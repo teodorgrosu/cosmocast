@@ -144,13 +144,16 @@ def compute_cls(
     cosmo.compute()
 
     # lensed spectra in K^2 -> convert to μK^2
-    cl = cosmo.lensed_cl(lmax)
+    #NOTE: classy returns power spectrum in dimensionless units, so you need to 
+    # account for that when converting...
+    T_CMB_muK = 2.7255e6  # μK
+    
+    cl  = cosmo.lensed_cl(lmax)
     ell = cl['ell'][1:]
-    TT = cl['tt'][1:] * 1e12
-    EE = cl['ee'][1:] * 1e12
-    BB = cl['bb'][1:] * 1e12
-    TE = cl['te'][1:] * 1e12
-
+    TT  = cl['tt'][1:] * T_CMB_muK**2
+    EE  = cl['ee'][1:] * T_CMB_muK**2
+    BB  = cl['bb'][1:] * T_CMB_muK**2
+    TE  = cl['te'][1:] * T_CMB_muK**2
     cosmo.struct_cleanup()
     cosmo.empty()
     return {'ell': ell, 'TT': TT, 'EE': EE, 'BB': BB, 'TE': TE}

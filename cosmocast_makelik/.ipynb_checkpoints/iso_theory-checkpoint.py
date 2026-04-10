@@ -1,9 +1,6 @@
 import numpy as np
 from classy import Class
 
-
-# ── science functions ────────────────────────────────────────────────────────
-
 def make_isocur_params(
     lmax=10_000,
     lensing=True,
@@ -147,13 +144,16 @@ def compute_cls(
     cosmo.compute()
 
     # lensed spectra in K^2 -> convert to μK^2
-    cl = cosmo.lensed_cl(lmax)
+    #NOTE: classy returns power spectrum in dimensionless units, so you need to 
+    # account for that when converting...
+    T_CMB_muK = 2.7255e6  # μK
+    
+    cl  = cosmo.lensed_cl(lmax)
     ell = cl['ell'][1:]
-    TT = cl['tt'][1:] * 1e12
-    EE = cl['ee'][1:] * 1e12
-    BB = cl['bb'][1:] * 1e12
-    TE = cl['te'][1:] * 1e12
-
+    TT  = cl['tt'][1:] * T_CMB_muK**2
+    EE  = cl['ee'][1:] * T_CMB_muK**2
+    BB  = cl['bb'][1:] * T_CMB_muK**2
+    TE  = cl['te'][1:] * T_CMB_muK**2
     cosmo.struct_cleanup()
     cosmo.empty()
     return {'ell': ell, 'TT': TT, 'EE': EE, 'BB': BB, 'TE': TE}
@@ -167,8 +167,6 @@ def knox_cross_cov(c_cross, c_1, c_2, ell, delta_ell, fsky):
 def make_cross_noise(cell_nz_1,cell_nz_2):
     return np.sqrt(cell_nz_1 * cell_nz_2)
 
-
-# ── utils ────────────────────────────────────────────────────────────────────
 
 def _interp_to(x_new, x_old, y_old):
     return np.interp(x_new, x_old, y_old)
